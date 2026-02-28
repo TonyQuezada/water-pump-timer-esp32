@@ -6,6 +6,14 @@ The project was built to fill a water reservoir tank that takes roughly 6 hours 
 
 ---
 
+## Images
+
+<p align="center">
+  <img src="images/img1.png" alt="Device" width="400">
+  &nbsp;&nbsp;&nbsp;
+  <img src="images/img2.png" alt="Web interface" width="250">
+</p>
+
 ## Hardware
 
 | Component | Notes |
