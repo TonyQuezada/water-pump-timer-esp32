@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control Bomba</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0a0e14;
+      --panel:     #111820;
+      --border:    #1e3a4a;
+      --accent:    #00d4ff;
+      --accent2:   #ff6b35;
+      --green:     #39ff14;
+      --danger:    #ff2244;
+      --text:      #cde8f0;
+      --muted:     #4a7a8a;
+      --glow:      0 0 12px rgba(0,212,255,0.4);
+      --glow-green:0 0 12px rgba(57,255,20,0.5);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(0,212,255,0.06) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,212,255,0.03) 39px, rgba(0,212,255,0.03) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,212,255,0.03) 39px, rgba(0,212,255,0.03) 40px);
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: var(--glow);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    h1 {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.1rem;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .status-pill {
+      margin-left: auto;
+      font-size: 0.7rem;
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 0.15em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      transition: all 0.3s;
+    }
+    .status-pill.on  { border-color: var(--green); color: var(--green); box-shadow: var(--glow-green); }
+    .status-pill.off { border-color: var(--muted); color: var(--muted); }
+
+    /* ---- CARDS ---- */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+    .card-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .card-value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 2.4rem;
+      color: var(--accent);
+      text-shadow: var(--glow);
+      line-height: 1;
+    }
+    .card-unit {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .card-row {
+      display: flex;
+      gap: 12px;
+    }
+    .card-row .card {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    /* ---- HOUR SELECTOR ---- */
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      width: 100%;
+      max-width: 420px;
+    }
+    .hour-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 16px;
+    }
+    .btn-hour {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.1rem;
+      padding: 16px 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .btn-hour span.sub { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em; }
+    .btn-hour:hover  { border-color: var(--accent); color: var(--accent); box-shadow: var(--glow); }
+    .btn-hour:active { transform: scale(0.95); }
+    .btn-hour.selected { border-color: var(--green); color: var(--green); box-shadow: var(--glow-green); }
+
+    /* ---- OFF BUTTON ---- */
+    .btn-off {
+      width: 100%;
+      max-width: 420px;
+      padding: 16px;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-off:hover  { background: rgba(255,34,68,0.1); box-shadow: 0 0 12px rgba(255,34,68,0.3); }
+    .btn-off:active { transform: scale(0.98); }
+
+    /* ---- ANIMATIONS ---- */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ---- TOAST ---- */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: var(--glow);
+      transition: transform 0.3s ease;
+      z-index: 100;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-dot"></div>
+    <h1>Control Bomba</h1>
+    <div class="status-pill off" id="statusPill">OFFLINE</div>
+  </header>
+
+  <!-- Stats row -->
+  <div class="card-row" style="max-width:420px;width:100%;margin-bottom:16px;">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-label">Tiempo restante</div>
+      <div class="card-value" id="timeRemaining">--:--</div>
+      <div class="card-unit">HH:MM</div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-label">Flujo actual</div>
+      <div class="card-value" id="flowRate">0.0</div>
+      <div class="card-unit">L / hora</div>
+    </div>
+  </div>
+
+  <!-- Hour selector -->
+  <div class="section-label">// Seleccionar duración</div>
+  <div class="hour-grid" id="hourGrid">
+    <button class="btn-hour" onclick="setHours(1)"><span>1</span><span class="sub">HORA</span></button>
+    <button class="btn-hour" onclick="setHours(2)"><span>2</span><span class="sub">HORAS</span></button>
+    <button class="btn-hour" onclick="setHours(3)"><span>3</span><span class="sub">HORAS</span></button>
+    <button class="btn-hour" onclick="setHours(4)"><span>4</span><span class="sub">HORAS</span></button>
+    <button class="btn-hour" onclick="setHours(5)"><span>5</span><span class="sub">HORAS</span></button>
+    <button class="btn-hour" onclick="setHours(6)"><span>6</span><span class="sub">HORAS</span></button>
+  </div>
+
+  <button class="btn-off" onclick="turnOff()">&#9632; APAGAR BOMBA</button>
+
+  <div id="toast"></div>
+
+  <script>
+    let selectedHours = null;
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function setHours(h) {
+      selectedHours = h;
+      // Highlight selected button
+      document.querySelectorAll('.btn-hour').forEach((b, i) => {
+        b.classList.toggle('selected', i + 1 === h);
+      });
+      fetch('/set?hours=' + h)
+        .then(r => r.text())
+        .then(() => showToast('Bomba activada por ' + h + (h === 1 ? ' hora' : ' horas')))
+        .catch(() => showToast('Error de conexion'));
+    }
+
+    function turnOff() {
+      fetch('/off')
+        .then(r => r.text())
+        .then(() => {
+          showToast('Bomba apagada');
+          selectedHours = null;
+          document.querySelectorAll('.btn-hour').forEach(b => b.classList.remove('selected'));
+        })
+        .catch(() => showToast('Error de conexion'));
+    }
+
+    function pollStatus() {
+      fetch('/status')
+        .then(r => r.json())
+        .then(data => {
+          // Remaining time
+          const totalSec = Math.max(0, Math.floor(data.remainingSeconds));
+          const hh = Math.floor(totalSec / 3600);
+          const mm = Math.floor((totalSec % 3600) / 60);
+          document.getElementById('timeRemaining').textContent =
+            data.isRunning ? pad(hh) + ':' + pad(mm) : '--:--';
+
+          // Flow
+          document.getElementById('flowRate').textContent =
+            parseFloat(data.flowLPH).toFixed(1);
+
+          // Status pill
+          const pill = document.getElementById('statusPill');
+          if (data.mode === 1) { // ON
+            pill.textContent = 'ACTIVO';
+            pill.className = 'status-pill on';
+          } else {
+            pill.textContent = 'EN ESPERA';
+            pill.className = 'status-pill off';
+            // Clear button highlight if stopped externally
+            if (selectedHours !== null && !data.isRunning) {
+              selectedHours = null;
+              document.querySelectorAll('.btn-hour').forEach(b => b.classList.remove('selected'));
+            }
+          }
+        })
+        .catch(() => {
+          document.getElementById('statusPill').textContent = 'OFFLINE';
+          document.getElementById('statusPill').className = 'status-pill off';
+        });
+    }
+
+    // Poll every second
+    setInterval(pollStatus, 1000);
+    pollStatus();
+  </script>
+</body>
+</html>
