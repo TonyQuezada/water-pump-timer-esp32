@@ -10,7 +10,6 @@ The project was built to fill a water reservoir tank that takes roughly 6 hours 
 
 <p align="center">
   <img src="images/img1.png" alt="Device" width="350">
-  &nbsp;&nbsp;&nbsp;
   <img src="images/img2.png" alt="Web interface" width="350">
 </p>
 
